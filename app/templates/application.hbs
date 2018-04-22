@@ -1,5 +1,6 @@
-{{!-- The following component displays Ember's default welcome message. --}}
-{{welcome-page}}
-{{!-- Feel free to remove this! --}}
-
-{{outlet}}
+<div class='row-container'>
+  {{#each gitInfo as |branch|}}
+    {{branch-row
+      branch=branch}}
+    {{/each}}
+</div>
