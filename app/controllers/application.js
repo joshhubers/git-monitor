@@ -2,22 +2,26 @@ import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 
 export default Controller.extend({
-  gitInfo: null,
   githubSession: service(),
   store: service(),
   foo: null,
+  gitInfo: null,
+  monitorRepo: '',
+  token: '',
 
   init() {
-    this.get('githubSession').set('githubAccessToken', '');
+    this.set('gitInfo', []);
+    this.get('githubSession').set('githubAccessToken', token);
 
-    this.get('store').query('github-branch', { repo: 'OAISD/inqwizit-uae-web-app' } ).then((branches) => { debugger; });
-      
+    this.get('store').query('github-branch', { repo: monitorRepo } ).then(branches => { 
+      branches.forEach(b => {
+        const branchSha = b.commit.sha;
 
-    this.set('gitInfo', [
-      { name: 'test-branch-error', status: 'error' },
-      { name: 'test-branch-failure', status: 'failure' },
-      { name: 'test-branch-pending', status: 'pending' },
-      { name: 'test-branch-success', status: 'success' },
-    ]);
+        this.get('store').queryRecord('github-state', { repo: monitorRepo, ref: branchSha}).then(gitState => {
+          const branchState = { name: b.name, status: gitState.state };
+          this.get('gitInfo').pushObject(branchState);
+        });
+      });
+    });
   },
 });

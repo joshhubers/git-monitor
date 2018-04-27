@@ -3,21 +3,23 @@
   flex-wrap: wrap;
   align-items: stretch;
   height: 100vh;
+  background: gray;
 }
 
 .branch-row {
   width: 100%;
-  font-size: 50px;
+  font-size: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 2px;
   
   &--error {
     background-color: gray;
   }
 
   &--failure {
-    background-color: red;
+    background-color: #ff9b9b;
   }
 
   &--pending {
@@ -25,6 +27,6 @@
   }
 
   &--success {
-    background-color: green;
+    background-color: #9bffbc;
   }
 }
