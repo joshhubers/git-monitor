@@ -1,13 +1,22 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
-import { get } from '@ember/object';
+import { set, get, computed } from '@ember/object';
 
 export default Controller.extend({
   githubSession: service(),
   store: service(),
   gitInfo: null,
-  monitorRepo: 'my-repo',
+  monitorRepo: '',
   token: '',
+
+  branches: computed('gitInfo.@each.status', function() {
+    return this.get('gitInfo').map(g => {
+      return {
+        status: g.status,
+        name: g.name
+      };
+    });
+  }),
 
   init() {
     this.set('gitInfo', []);
@@ -27,6 +36,15 @@ export default Controller.extend({
 
   fetchAndBuildBranches() {
     get(this, 'store').query('github-branch', { repo: this.get('monitorRepo') }, { reload : true } ).then(branches => { 
+
+      const info = get(this, 'gitInfo');
+
+      const branchesToRemove = info.filter(branch => branches.mapBy('name').indexOf(branch.name) === -1);
+
+      if(branchesToRemove.length > 0) {
+        set(this, 'gitInfo', info.filter(branch => branchesToRemove.mapBy('name').indexOf(branch.name) === -1));
+      }
+
       this.buildBranches(branches);
     });
   },
@@ -35,12 +53,14 @@ export default Controller.extend({
     branches.forEach(b => {
       const branchSha = b.commit.sha;
 
-      get(this, 'store').queryRecord('github-state', { repo: this.get('monitorRepo'), ref: branchSha}).then(gitState => {
+      get(this, 'store').queryRecord('github-state', { repo: this.get('monitorRepo'), ref: branchSha}, { reload : true }).then(gitState => {
         const branchState = { name: b.name, status: gitState.state };
 
         const existing = get(this, 'gitInfo').find(gi => gi.name === branchState.name);
+
+
         if(existing) {
-          this.set('existing', 'status', get(branchState, 'status'));
+          set(existing, 'status', get(branchState, 'status'));
         } else {
           get(this, 'gitInfo').pushObject(branchState);
         }
