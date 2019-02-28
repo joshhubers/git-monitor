@@ -1,13 +1,17 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 import { set, get, computed } from '@ember/object';
+import { later } from '@ember/runloop';
 
 export default Controller.extend({
   githubSession: service(),
   store: service(),
+  websockets: service(),
+  socketRef: null,
   gitInfo: null,
-  monitorRepo: '',
-  token: '',
+  monitorRepo: 'foo',
+  token: 'foo',
+  serverUrl: 'ws://localhost:9001',
 
   branches: computed('gitInfo.@each.status', function() {
     return this.get('gitInfo').map(g => {
@@ -19,15 +23,45 @@ export default Controller.extend({
   }),
 
   init() {
+    this._super(...arguments);
     this.set('gitInfo', []);
     get(this, 'githubSession').set('githubAccessToken', this.get('token'));
 
     this.fetchAndBuildBranches();
+    this.setupWebSocket();
     this.poll();
   },
 
+  willDestroy() {
+    this._super(...arguments);
+    const socket = this.socketRef;
+    socket.off('open', this.openHandler);
+    socket.off('message', this.messageHandler);
+    socket.off('close', this.closeHandler);
+  },
+
+  setupWebSocket() {
+    const socket = this.websockets.socketFor(this.serverUrl);
+    socket.on('open', this.openHandler, this);
+    socket.on('message', this.messageHandler, this);
+    socket.on('close', this.closeHandler, this);
+    this.set('socketRef', socket);
+  },
+
+  openHandler(event) {
+
+  },
+
+  messageHandler(event) {
+
+  },
+
+  closeHandler(event) {
+
+  },
+
   poll() {
-    Ember.run.later(this, 
+    later(this, 
       function() { 
         this.fetchAndBuildBranches();
         this.poll();

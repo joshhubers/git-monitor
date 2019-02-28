@@ -24,7 +24,7 @@ module.exports = function(environment) {
   };
 
   ENV['ember-cli-mirage'] = {
-    enabled: false
+    enabled: true
   };
 
   if (environment === 'development') {
