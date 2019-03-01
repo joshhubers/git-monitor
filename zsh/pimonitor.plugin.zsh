@@ -7,6 +7,6 @@ chpwd() {
     REPO_URL=${REPO_URL#"https://github.com/"}
     REPO_URL=${REPO_URL%".git"}
 
-    ssh pi@pi "echo '{ branch: $BRANCH, repoUrl: $REPO_URL }' > repoConfig.json" > /dev/null &
+    ( ssh pi@pi "echo '{ branch: $BRANCH, repoUrl: $REPO_URL, auth: $GIT_MONITOR_AUTH }' > repoConfig.json" & )
 	fi
 }
