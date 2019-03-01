@@ -7,8 +7,8 @@ export default Controller.extend({
   githubSession: service(),
   store: service(),
   gitInfo: null,
-  monitorRepo: 'my/repo',
-  token: 'foo',
+  monitorRepo: 'OAISD/inqwizit-reporting',
+  token: 'de50b3d0ed59c74bcb8a74c3f819a4ab4d3f230a',
 
   branches: computed('gitInfo.@each.status', function() {
     return this.get('gitInfo').map(g => {
